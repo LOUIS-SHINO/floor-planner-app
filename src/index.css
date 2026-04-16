@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --color-void: #111111;
+  --color-void-light: #2B3142;
+  --color-gold: #D4AF37;
+  --color-cyan: #00E5FF;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background-color: var(--color-void);
+  color: white;
+}
