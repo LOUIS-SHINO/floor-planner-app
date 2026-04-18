@@ -44,6 +44,25 @@ const CYBER_COLORS = [
   "#00FFA3", // Mint
 ];
 
+const getNextColor = (currentZones: Zone[]) => {
+  const colorCounts = new Map<string, number>();
+  CYBER_COLORS.forEach(c => colorCounts.set(c, 0));
+  currentZones.forEach(z => {
+    if (z.color && colorCounts.has(z.color)) {
+      colorCounts.set(z.color, colorCounts.get(z.color)! + 1);
+    }
+  });
+  let minCount = Infinity;
+  let chosenColor = CYBER_COLORS[0];
+  for (const [color, count] of colorCounts.entries()) {
+    if (count < minCount) {
+      minCount = count;
+      chosenColor = color;
+    }
+  }
+  return chosenColor;
+};
+
 export default function App() {
   const [floor, setFloor] = useState<Floor>('4F');
   const [mode, setMode] = useState<Mode>('pan');
@@ -113,7 +132,7 @@ export default function App() {
         width: 0,
         height: 0,
         name: `新區塊 ${zones.length + 1}`,
-        color: CYBER_COLORS[zones.length % CYBER_COLORS.length]
+        color: getNextColor(zones.filter(z => z.floor === floor))
       });
     } else if (mode === 'measure') {
       setMeasureStep(1);
@@ -332,18 +351,46 @@ export default function App() {
             })}
 
             {/* Render Rect in Progress */}
-            {newZone && (
-              <Rect
-                x={newZone.x}
-                y={newZone.y}
-                width={newZone.width}
-                height={newZone.height}
-                stroke={newZone.color || "#00E5FF"}
-                strokeWidth={2 / stageScale}
-                dash={[5 / stageScale, 5 / stageScale]}
-                fill={(newZone.color || "#00E5FF") + "1A"} // roughly 0.1 opacity
-              />
-            )}
+            {newZone && (() => {
+              let nx = newZone.x!;
+              let ny = newZone.y!;
+              let nw = newZone.width || 0;
+              let nh = newZone.height || 0;
+              if (nw < 0) { nx += nw; nw = Math.abs(nw); }
+              if (nh < 0) { ny += nh; nh = Math.abs(nh); }
+              const widthM = (nw / pixelsPerMeter).toFixed(1);
+              const heightM = (nh / pixelsPerMeter).toFixed(1);
+
+              return (
+                <Group x={nx} y={ny}>
+                  <Rect
+                    width={nw}
+                    height={nh}
+                    stroke={newZone.color || "#00E5FF"}
+                    strokeWidth={2 / stageScale}
+                    dash={[5 / stageScale, 5 / stageScale]}
+                    fill={(newZone.color || "#00E5FF") + "1A"} // roughly 0.1 opacity
+                  />
+                  {nw > 20 && nh > 20 && (
+                    <>
+                      <Rect 
+                        x={0} y={-24 / stageScale}
+                        width={nw} height={24 / stageScale}
+                        fill="rgba(0,0,0,0.6)"
+                      />
+                      <Text
+                        x={4 / stageScale} y={-18 / stageScale}
+                        text={`圈劃中... (${widthM}m x ${heightM}m)`}
+                        fill={newZone.color || "#00E5FF"}
+                        fontSize={14 / stageScale}
+                        fontFamily="sans-serif"
+                        fontStyle="bold"
+                      />
+                    </>
+                  )}
+                </Group>
+              );
+            })()}
 
             {/* Render Measure Line */}
             {measureLine && (
