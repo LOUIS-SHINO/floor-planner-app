@@ -22,7 +22,7 @@ function useImage(url: string) {
 
 // Types
 type Mode = 'pan' | 'draw' | 'measure';
-type Floor = '4F' | '5F';
+type Floor = '3F' | '4F' | '5F';
 interface Zone {
   id: string;
   floor: Floor;
@@ -197,6 +197,12 @@ export default function App() {
         {/* Tools Panel */}
         <div className="p-6 flex flex-col gap-4 border-b border-[#00E5FF]/20">
           <div className="flex bg-[#2B3142] rounded-lg p-1">
+            <button
+              onClick={() => setFloor('3F')}
+              className={cn("flex-1 py-1.5 text-sm font-bold rounded-md transition-all tracking-widest", floor === '3F' ? "bg-[#00E5FF]/20 text-[#00E5FF] shadow-[0_0_10px_rgba(0,229,255,0.2)]" : "text-gray-400 hover:text-white")}
+            >
+              3F 視圖
+            </button>
             <button
               onClick={() => setFloor('4F')}
               className={cn("flex-1 py-1.5 text-sm font-bold rounded-md transition-all tracking-widest", floor === '4F' ? "bg-[#00E5FF]/20 text-[#00E5FF] shadow-[0_0_10px_rgba(0,229,255,0.2)]" : "text-gray-400 hover:text-white")}
